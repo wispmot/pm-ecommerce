@@ -1,0 +1,19 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: pm-ecommerce
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pm_ecommerce
+    username: postgres
+    password: secret_password
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
