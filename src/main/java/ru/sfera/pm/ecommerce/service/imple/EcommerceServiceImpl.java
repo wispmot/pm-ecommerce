@@ -7,10 +7,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.core.convert.ConversionService;
 
+import ru.sfera.pm.ecommerce.exceptions.NotFoundException;
+import ru.sfera.pm.ecommerce.exceptions.ValidationException;
 import ru.sfera.pm.ecommerce.model.dto.ProductDto;
 import ru.sfera.pm.ecommerce.model.entity.Product;
 import ru.sfera.pm.ecommerce.repository.ProductRepository;
 import ru.sfera.pm.ecommerce.service.EcommerceService;
+
+import java.util.Objects;
+
+import static java.util.Objects.isNull;
 
 @Service
 @RequiredArgsConstructor
@@ -28,22 +34,41 @@ public class EcommerceServiceImpl implements EcommerceService {
 
     @Override
     public ProductDto getProduct(Long id) {
-        return null;
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Товара с таким ID не существует"));
+
+        return conversionService.convert(product, ProductDto.class);
     }
 
     @Override
     public Page<ProductDto> getInStock(Pageable pageable) {
-        return null;
+        return productRepository.findByStockQuantityGreaterThan(0, pageable)
+                .map(product -> conversionService.convert(product, ProductDto.class));
     }
 
     @Override
+    @Transactional
     public ProductDto createProduct(ProductDto productDto) {
-        return null;
+        checkProductName(productDto.getName());
+
+        Product product = conversionService.convert(productDto, Product.class);
+        Product saved = productRepository.save(Objects.requireNonNull(product));
+
+        return conversionService.convert(saved, ProductDto.class);
+    }
+
+    private void checkProductName(String name) {
+        if (productRepository.existsByNameIgnoreCase(name)) {
+            throw new ValidationException("Товар с таким именем уже существует");
+        }
     }
 
     @Override
     public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Товара с таким ID не существует"));
 
+        productRepository.delete(product);
     }
 
     @Override

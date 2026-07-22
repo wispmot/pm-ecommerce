@@ -32,7 +32,7 @@ public class EcommerceController {
         return ResponseEntity.ok(ecommerceService.getProduct(id));
     }
 
-    @GetMapping("/{in-stock}")
+    @GetMapping("/in-stock")
     @Operation(summary = "Только товары в наличии")
     public ResponseEntity<Page<ProductDto>> getProductsInStock(@ParameterObject Pageable pageable){
         return ResponseEntity.ok(ecommerceService.getInStock(pageable));
