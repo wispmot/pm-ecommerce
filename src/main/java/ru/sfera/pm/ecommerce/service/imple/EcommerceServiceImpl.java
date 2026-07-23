@@ -7,10 +7,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.core.convert.ConversionService;
 
+import ru.sfera.pm.ecommerce.exceptions.NotFoundException;
+import ru.sfera.pm.ecommerce.exceptions.ValidationException;
 import ru.sfera.pm.ecommerce.model.dto.ProductDto;
 import ru.sfera.pm.ecommerce.model.entity.Product;
 import ru.sfera.pm.ecommerce.repository.ProductRepository;
 import ru.sfera.pm.ecommerce.service.EcommerceService;
+
+import java.util.Objects;
+
+import static java.util.Objects.isNull;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +24,9 @@ public class EcommerceServiceImpl implements EcommerceService {
 
     private final ConversionService conversionService;
     private final ProductRepository productRepository;
+
+    private static final String PRODUCT_EXIST = "Товар с таким именем уже существует";
+    private static final String PRODUCT_NOT_FOUND = "Товара с таким ID не существует";
 
     @Override
     @Transactional(readOnly = true)
@@ -27,33 +36,83 @@ public class EcommerceServiceImpl implements EcommerceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProductDto getProduct(Long id) {
-        return null;
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+
+        return conversionService.convert(product, ProductDto.class);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ProductDto> getInStock(Pageable pageable) {
-        return null;
+        return productRepository.findByStockQuantityGreaterThan(0, pageable)
+                .map(product -> conversionService.convert(product, ProductDto.class));
     }
 
     @Override
+    @Transactional
     public ProductDto createProduct(ProductDto productDto) {
-        return null;
+        checkProductName(productDto.getName());
+
+        Product product = conversionService.convert(productDto, Product.class);
+        Product saved = productRepository.save(Objects.requireNonNull(product));
+
+        return conversionService.convert(saved, ProductDto.class);
+    }
+
+    private void checkProductName(String name) {
+        if (productRepository.existsByNameIgnoreCase(name)) {
+            throw new ValidationException(PRODUCT_EXIST);
+        }
     }
 
     @Override
     public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
 
+        productRepository.delete(product);
     }
 
     @Override
+    @Transactional
     public ProductDto updatePatchProduct(Long id, ProductDto productDto) {
-        return null;
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+
+        if (productDto.getName() != null){
+            if (!product.getName().equalsIgnoreCase(productDto.getName())){
+                checkProductName(productDto.getName());
+            }
+        }
+
+        patchProduct(product, productDto);
+        productRepository.save(product);
+        return conversionService.convert(product, ProductDto.class);
+    }
+
+    public void patchProduct(Product product, ProductDto dto){
+        if (dto.getName() != null) product.setName(dto.getName());
+        if (dto.getPrice() != null) product.setPrice(dto.getPrice());
+        if (dto.getDescription() != null) product.setDescription(dto.getDescription());
+        if (dto.getStockQuantity() != null) product.setStockQuantity(dto.getStockQuantity());
     }
 
     @Override
+    @Transactional
     public ProductDto updatePutProduct(Long id, ProductDto productDto) {
-        return null;
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+
+        if (!product.getName().equalsIgnoreCase(productDto.getName())){
+            checkProductName(productDto.getName());
+        }
+
+        product.copy(Objects.requireNonNull(conversionService.convert(productDto, Product.class)));
+        productRepository.save(product);
+        return conversionService.convert(product, ProductDto.class);
     }
 
 }
