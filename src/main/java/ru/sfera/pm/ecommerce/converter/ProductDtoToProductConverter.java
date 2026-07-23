@@ -15,13 +15,10 @@ public class ProductDtoToProductConverter implements Converter<ProductDto, Produ
     @Override
     public Product convert(ProductDto dto) {
         Product product = new Product();
-        //product.setId(dto.getId());
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setStockQuantity(dto.getStockQuantity());
-        product.setCreatedAt(dto.getCreatedAt());
-        product.setUpdatedAt(dto.getUpdatedAt());
         return product;
     }
 

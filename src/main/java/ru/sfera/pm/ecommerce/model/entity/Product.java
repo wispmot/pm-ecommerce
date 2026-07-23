@@ -41,4 +41,10 @@ public class Product {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public void copy(Product product){
+        this.name = product.name;
+        this.description = product.description;
+        this.price = product.price;
+        this.stockQuantity = product.stockQuantity;
+    }
 }

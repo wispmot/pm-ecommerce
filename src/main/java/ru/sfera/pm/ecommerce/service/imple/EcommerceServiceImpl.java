@@ -25,6 +25,9 @@ public class EcommerceServiceImpl implements EcommerceService {
     private final ConversionService conversionService;
     private final ProductRepository productRepository;
 
+    private static final String PRODUCT_EXIST = "Товар с таким именем уже существует";
+    private static final String PRODUCT_NOT_FOUND = "Товара с таким ID не существует";
+
     @Override
     @Transactional(readOnly = true)
     public Page<ProductDto> getAll(Pageable pageable) {
@@ -33,14 +36,16 @@ public class EcommerceServiceImpl implements EcommerceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProductDto getProduct(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Товара с таким ID не существует"));
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
 
         return conversionService.convert(product, ProductDto.class);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ProductDto> getInStock(Pageable pageable) {
         return productRepository.findByStockQuantityGreaterThan(0, pageable)
                 .map(product -> conversionService.convert(product, ProductDto.class));
@@ -59,26 +64,55 @@ public class EcommerceServiceImpl implements EcommerceService {
 
     private void checkProductName(String name) {
         if (productRepository.existsByNameIgnoreCase(name)) {
-            throw new ValidationException("Товар с таким именем уже существует");
+            throw new ValidationException(PRODUCT_EXIST);
         }
     }
 
     @Override
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Товара с таким ID не существует"));
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
 
         productRepository.delete(product);
     }
 
     @Override
+    @Transactional
     public ProductDto updatePatchProduct(Long id, ProductDto productDto) {
-        return null;
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+
+        if (productDto.getName() != null){
+            if (!product.getName().equalsIgnoreCase(productDto.getName())){
+                checkProductName(productDto.getName());
+            }
+        }
+
+        patchProduct(product, productDto);
+        productRepository.save(product);
+        return conversionService.convert(product, ProductDto.class);
+    }
+
+    public void patchProduct(Product product, ProductDto dto){
+        if (dto.getName() != null) product.setName(dto.getName());
+        if (dto.getPrice() != null) product.setPrice(dto.getPrice());
+        if (dto.getDescription() != null) product.setDescription(dto.getDescription());
+        if (dto.getStockQuantity() != null) product.setStockQuantity(dto.getStockQuantity());
     }
 
     @Override
+    @Transactional
     public ProductDto updatePutProduct(Long id, ProductDto productDto) {
-        return null;
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+
+        if (!product.getName().equalsIgnoreCase(productDto.getName())){
+            checkProductName(productDto.getName());
+        }
+
+        product.copy(Objects.requireNonNull(conversionService.convert(productDto, Product.class)));
+        productRepository.save(product);
+        return conversionService.convert(product, ProductDto.class);
     }
 
 }

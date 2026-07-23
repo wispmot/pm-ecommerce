@@ -15,4 +15,11 @@ public class RestExceptionHandler {
                 .body(e.getMessage());
     }
 
+    @ExceptionHandler
+    public ResponseEntity<String> handleValidation(NotFoundException e) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(e.getMessage());
+    }
+
 }
