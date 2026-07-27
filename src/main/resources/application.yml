@@ -3,13 +3,10 @@ server:
   shutdown: graceful
 
 spring:
+  profiles:
+    active: local
   application:
     name: pm-ecommerce
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/pm_ecommerce
-    username: postgres
-    password: secret_password
 
   jpa:
     hibernate:
@@ -19,5 +16,8 @@ spring:
         jdbc:
           time_zone: UTC
 
-  liquibase:
-    change-log: classpath:db/liquibase/changelog.xml
+logging:
+  level:
+    ru.sfera.pm.ecommerce: DEBUG
+  file:
+    name: logs/ecommerce.log

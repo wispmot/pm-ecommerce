@@ -1,6 +1,7 @@
 package ru.sfera.pm.ecommerce.service.imple;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.Objects;
 import static java.util.Objects.isNull;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EcommerceServiceImpl implements EcommerceService {
 
@@ -39,7 +41,7 @@ public class EcommerceServiceImpl implements EcommerceService {
     @Transactional(readOnly = true)
     public ProductDto getProduct(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND, id));
 
         return conversionService.convert(product, ProductDto.class);
     }
@@ -59,6 +61,7 @@ public class EcommerceServiceImpl implements EcommerceService {
         Product product = conversionService.convert(productDto, Product.class);
         Product saved = productRepository.save(Objects.requireNonNull(product));
 
+        log.info("Создан новый товар с id: {}", saved.getId());
         return conversionService.convert(saved, ProductDto.class);
     }
 
@@ -71,16 +74,17 @@ public class EcommerceServiceImpl implements EcommerceService {
     @Override
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND, id));
 
         productRepository.delete(product);
+        log.info("Удален товар с id: {}", product.getId());
     }
 
     @Override
     @Transactional
     public ProductDto updatePatchProduct(Long id, ProductDto productDto) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND, id));
 
         if (productDto.getName() != null){
             if (!product.getName().equalsIgnoreCase(productDto.getName())){
@@ -90,10 +94,11 @@ public class EcommerceServiceImpl implements EcommerceService {
 
         patchProduct(product, productDto);
         productRepository.save(product);
+        log.info("Частично изменен товар с id: {}", product.getId());
         return conversionService.convert(product, ProductDto.class);
     }
 
-    public void patchProduct(Product product, ProductDto dto){
+    private void patchProduct(Product product, ProductDto dto){
         if (dto.getName() != null) product.setName(dto.getName());
         if (dto.getPrice() != null) product.setPrice(dto.getPrice());
         if (dto.getDescription() != null) product.setDescription(dto.getDescription());
@@ -104,7 +109,7 @@ public class EcommerceServiceImpl implements EcommerceService {
     @Transactional
     public ProductDto updatePutProduct(Long id, ProductDto productDto) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND, id));
 
         if (!product.getName().equalsIgnoreCase(productDto.getName())){
             checkProductName(productDto.getName());
@@ -112,6 +117,7 @@ public class EcommerceServiceImpl implements EcommerceService {
 
         product.copy(Objects.requireNonNull(conversionService.convert(productDto, Product.class)));
         productRepository.save(product);
+        log.info("Полностью изменен товар с id: {}", product.getId());
         return conversionService.convert(product, ProductDto.class);
     }
 
