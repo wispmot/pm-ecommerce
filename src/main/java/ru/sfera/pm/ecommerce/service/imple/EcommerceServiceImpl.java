@@ -17,8 +17,6 @@ import ru.sfera.pm.ecommerce.service.EcommerceService;
 
 import java.util.Objects;
 
-import static java.util.Objects.isNull;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor

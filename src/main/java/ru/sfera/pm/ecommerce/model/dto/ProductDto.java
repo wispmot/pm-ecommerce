@@ -7,8 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor(force = true)
-@AllArgsConstructor
+@NoArgsConstructor
 public class ProductDto {
 
     @Schema(title = "Уникальный идентификатор")
@@ -31,5 +30,11 @@ public class ProductDto {
 
     @Schema(title = "Дата обновления")
     LocalDateTime updatedAt;
+
+    @Schema(title = "id категории")
+    Long categoryId;
+
+    @Schema(title = "Название категории")
+    String categoryName;
 
 }

@@ -9,7 +9,6 @@ import ru.sfera.pm.ecommerce.model.dto.ProductDto;
 import ru.sfera.pm.ecommerce.model.entity.Product;
 
 @Component
-@RequiredArgsConstructor
 public class ProductToProductDtoConverter implements Converter<Product, ProductDto> {
 
     @Override
@@ -22,6 +21,11 @@ public class ProductToProductDtoConverter implements Converter<Product, ProductD
         dto.setStockQuantity(product.getStockQuantity());
         dto.setCreatedAt(product.getCreatedAt());
         dto.setUpdatedAt(product.getUpdatedAt());
+
+        if (product.getCategory() != null){
+            dto.setCategoryId(product.getCategory().getId());
+            dto.setCategoryName(product.getCategory().getName());
+        }
         return dto;
     }
 }
