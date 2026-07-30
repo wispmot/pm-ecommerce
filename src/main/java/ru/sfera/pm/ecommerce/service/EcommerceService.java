@@ -23,4 +23,6 @@ public interface EcommerceService {
     ProductDto updatePatchProduct(Long id, ProductDto productDto);
 
     ProductDto updatePutProduct(Long id, ProductDto productDto);
+
+    Page<ProductDto> getProductsByCategory(Long id, Pageable pageable);
 }

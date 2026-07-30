@@ -6,4 +6,7 @@ public class NotFoundException extends RuntimeException {
         super(message + " (id=" + id + ")");
     }
 
+    public NotFoundException(String message, String name) {
+        super(message + " (Имя=" + name + ")");
+    }
 }

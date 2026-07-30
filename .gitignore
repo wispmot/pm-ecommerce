@@ -40,3 +40,6 @@ out/
 logs/
 *.log
 *.gz
+
+### Profile ###
+.env

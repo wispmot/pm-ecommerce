@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.sfera.pm.ecommerce.model.dto.ProductDto;
 import ru.sfera.pm.ecommerce.service.EcommerceService;
 
-import java.util.UUID;
-
 @RestController
 @Slf4j
 @RequiredArgsConstructor

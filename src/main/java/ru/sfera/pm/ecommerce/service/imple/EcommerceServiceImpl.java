@@ -11,7 +11,9 @@ import org.springframework.core.convert.ConversionService;
 import ru.sfera.pm.ecommerce.exceptions.NotFoundException;
 import ru.sfera.pm.ecommerce.exceptions.ValidationException;
 import ru.sfera.pm.ecommerce.model.dto.ProductDto;
+import ru.sfera.pm.ecommerce.model.entity.Category;
 import ru.sfera.pm.ecommerce.model.entity.Product;
+import ru.sfera.pm.ecommerce.repository.CategoryRepository;
 import ru.sfera.pm.ecommerce.repository.ProductRepository;
 import ru.sfera.pm.ecommerce.service.EcommerceService;
 
@@ -24,9 +26,12 @@ public class EcommerceServiceImpl implements EcommerceService {
 
     private final ConversionService conversionService;
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     private static final String PRODUCT_EXIST = "Товар с таким именем уже существует";
     private static final String PRODUCT_NOT_FOUND = "Товара с таким ID не существует";
+    private static final String CATEGORY_NOT_FOUND = "Категории с таким ID не существует";
+    private static final String CATEGORY_NOT_FOUND_NAME = "Категории с таким именем не существует";
 
     @Override
     @Transactional(readOnly = true)
@@ -55,9 +60,11 @@ public class EcommerceServiceImpl implements EcommerceService {
     @Transactional
     public ProductDto createProduct(ProductDto productDto) {
         checkProductName(productDto.getName());
+        Category category = getCategoryByName(productDto.getCategoryName());
 
         Product product = conversionService.convert(productDto, Product.class);
-        Product saved = productRepository.save(Objects.requireNonNull(product));
+        Objects.requireNonNull(product).setCategory(category);
+        Product saved = productRepository.save(product);
 
         log.info("Создан новый товар с id: {}", saved.getId());
         return conversionService.convert(saved, ProductDto.class);
@@ -70,6 +77,7 @@ public class EcommerceServiceImpl implements EcommerceService {
     }
 
     @Override
+    @Transactional
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(PRODUCT_NOT_FOUND, id));
@@ -90,17 +98,20 @@ public class EcommerceServiceImpl implements EcommerceService {
             }
         }
 
-        patchProduct(product, productDto);
+        Category category = getCategoryByName(productDto.getCategoryName());
+
+        patchProduct(product, productDto, category);
         productRepository.save(product);
         log.info("Частично изменен товар с id: {}", product.getId());
         return conversionService.convert(product, ProductDto.class);
     }
 
-    private void patchProduct(Product product, ProductDto dto){
+    private void patchProduct(Product product, ProductDto dto, Category category){
         if (dto.getName() != null) product.setName(dto.getName());
         if (dto.getPrice() != null) product.setPrice(dto.getPrice());
         if (dto.getDescription() != null) product.setDescription(dto.getDescription());
         if (dto.getStockQuantity() != null) product.setStockQuantity(dto.getStockQuantity());
+        if (category != null) product.setCategory(category);
     }
 
     @Override
@@ -112,11 +123,33 @@ public class EcommerceServiceImpl implements EcommerceService {
         if (!product.getName().equalsIgnoreCase(productDto.getName())){
             checkProductName(productDto.getName());
         }
+        Category category = getCategoryByName(productDto.getCategoryName());
 
         product.copy(Objects.requireNonNull(conversionService.convert(productDto, Product.class)));
+        product.setCategory(category);
         productRepository.save(product);
         log.info("Полностью изменен товар с id: {}", product.getId());
         return conversionService.convert(product, ProductDto.class);
     }
 
+    private Category getCategoryByName(String categoryName) {
+        if (categoryName == null) {
+            return null;
+        }
+
+        return categoryRepository.findByNameIgnoreCase(categoryName)
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_NAME, categoryName));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductDto> getProductsByCategory(Long id, Pageable pageable) {
+
+        if (!categoryRepository.existsById(id)){
+            throw new NotFoundException(CATEGORY_NOT_FOUND, id);
+        }
+
+        return productRepository.findByCategoryId(id, pageable)
+                .map(product -> conversionService.convert(product, ProductDto.class));
+    }
 }

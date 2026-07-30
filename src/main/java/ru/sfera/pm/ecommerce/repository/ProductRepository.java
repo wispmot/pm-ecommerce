@@ -15,5 +15,5 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
 
     Page<Product> findByStockQuantityGreaterThan(int quantity, Pageable pageable);
 
-    List<Product> findByCategoryId(Long categoryId);
+    Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
 }

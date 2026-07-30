@@ -20,12 +20,6 @@ public class ProductDtoToProductConverter implements Converter<ProductDto, Produ
         product.setPrice(dto.getPrice());
         product.setStockQuantity(dto.getStockQuantity());
 
-        if (dto.getCategoryId() != null){
-            Category category = new Category();
-            category.setId(dto.getCategoryId());
-            product.setCategory(category);
-        }
         return product;
     }
-
 }

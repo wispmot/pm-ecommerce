@@ -16,6 +16,14 @@ spring:
         jdbc:
           time_zone: UTC
 
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  liquibase:
+    change-log: classpath:db/liquibase/changelog.xml
+
 logging:
   level:
     ru.sfera.pm.ecommerce: DEBUG
