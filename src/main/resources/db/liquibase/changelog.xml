@@ -11,4 +11,12 @@
         <sqlFile encoding="utf8" path="changes/002-insert-test-data.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="003" author="aerofeev" dbms="postgresql">
+        <sqlFile encoding="utf8" path="changes/003-add-categories.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="004" author="aerofeev" dbms="postgresql">
+        <sqlFile encoding="utf8" path="changes/004-insert-categories.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

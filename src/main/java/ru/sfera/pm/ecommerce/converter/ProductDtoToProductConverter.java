@@ -6,10 +6,10 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import ru.sfera.pm.ecommerce.model.dto.ProductDto;
+import ru.sfera.pm.ecommerce.model.entity.Category;
 import ru.sfera.pm.ecommerce.model.entity.Product;
 
 @Component
-@RequiredArgsConstructor
 public class ProductDtoToProductConverter implements Converter<ProductDto, Product>{
 
     @Override
@@ -19,7 +19,7 @@ public class ProductDtoToProductConverter implements Converter<ProductDto, Produ
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setStockQuantity(dto.getStockQuantity());
+
         return product;
     }
-
 }

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.sfera.pm.ecommerce.model.entity.Product;
 
-import java.util.UUID;
+import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>{
@@ -14,4 +14,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
     Boolean existsByNameIgnoreCase(String name);
 
     Page<Product> findByStockQuantityGreaterThan(int quantity, Pageable pageable);
+
+    Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
 }
