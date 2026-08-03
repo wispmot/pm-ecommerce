@@ -15,14 +15,14 @@ import ru.sfera.pm.ecommerce.model.entity.Category;
 import ru.sfera.pm.ecommerce.model.entity.Product;
 import ru.sfera.pm.ecommerce.repository.CategoryRepository;
 import ru.sfera.pm.ecommerce.repository.ProductRepository;
-import ru.sfera.pm.ecommerce.service.EcommerceService;
+import ru.sfera.pm.ecommerce.service.ProductService;
 
 import java.util.Objects;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class EcommerceServiceImpl implements EcommerceService {
+public class ProductServiceImpl implements ProductService {
 
     private final ConversionService conversionService;
     private final ProductRepository productRepository;
@@ -30,7 +30,6 @@ public class EcommerceServiceImpl implements EcommerceService {
 
     private static final String PRODUCT_EXIST = "Товар с таким именем уже существует";
     private static final String PRODUCT_NOT_FOUND = "Товара с таким ID не существует";
-    private static final String CATEGORY_NOT_FOUND = "Категории с таким ID не существует";
     private static final String CATEGORY_NOT_FOUND_NAME = "Категории с таким именем не существует";
 
     @Override
@@ -141,15 +140,4 @@ public class EcommerceServiceImpl implements EcommerceService {
                 .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_NAME, categoryName));
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ProductDto> getProductsByCategory(Long id, Pageable pageable) {
-
-        if (!categoryRepository.existsById(id)){
-            throw new NotFoundException(CATEGORY_NOT_FOUND, id);
-        }
-
-        return productRepository.findByCategoryId(id, pageable)
-                .map(product -> conversionService.convert(product, ProductDto.class));
-    }
 }

@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ru.sfera.pm.ecommerce.model.dto.CategoryDto;
-import ru.sfera.pm.ecommerce.model.dto.ProductDto;
+import ru.sfera.pm.ecommerce.model.dto.CategoryDtoExtended;
 import ru.sfera.pm.ecommerce.service.CategoryService;
-import ru.sfera.pm.ecommerce.service.EcommerceService;
+import ru.sfera.pm.ecommerce.service.ProductService;
 
 @RestController
 @Slf4j
@@ -28,7 +28,7 @@ import ru.sfera.pm.ecommerce.service.EcommerceService;
 public class CategoryController {
 
     private final CategoryService categoryService;
-    private final EcommerceService ecommerceService;
+    private final ProductService productService;
 
     @GetMapping
     @Operation(summary = "Получить список категорий")
@@ -38,18 +38,10 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Получить информацию о категории по ID")
-    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Long id) {
-        log.debug("Запрос на получение информации о категории по id: {}", id);
-        return ResponseEntity.ok(categoryService.getCategory(id));
-    }
-
-    @GetMapping("/{id}/products")
-    @Operation(summary = "Получить список товаров по ID категории")
-    public ResponseEntity<Page<ProductDto>> getProductsByCategory(@PathVariable Long id,
-                                                                  @ParameterObject Pageable pageable) {
-        log.debug("Запрос на получение списка товаров по id категории: {}", id);
-        return ResponseEntity.ok(ecommerceService.getProductsByCategory(id, pageable));
+    @Operation(summary = "Получить информацию о категории и её товарах по ID")
+    public ResponseEntity<CategoryDtoExtended> getCategoryWithProducts(@PathVariable Long id) {
+        log.debug("Запрос на получение информации о категории и её товарах по id: {}", id);
+        return ResponseEntity.ok(categoryService.getCategoryWithProducts(id));
     }
 
     @PostMapping
