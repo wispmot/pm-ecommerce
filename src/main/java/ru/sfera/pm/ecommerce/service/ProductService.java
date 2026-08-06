@@ -3,12 +3,9 @@ package ru.sfera.pm.ecommerce.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.sfera.pm.ecommerce.model.dto.ProductDto;
 
-public interface EcommerceService {
+public interface ProductService {
 
     Page<ProductDto> getAll(Pageable pageable);
 
@@ -23,6 +20,4 @@ public interface EcommerceService {
     ProductDto updatePatchProduct(Long id, ProductDto productDto);
 
     ProductDto updatePutProduct(Long id, ProductDto productDto);
-
-    Page<ProductDto> getProductsByCategory(Long id, Pageable pageable);
 }

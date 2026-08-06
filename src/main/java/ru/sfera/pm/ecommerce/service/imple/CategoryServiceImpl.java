@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.sfera.pm.ecommerce.exceptions.NotFoundException;
 import ru.sfera.pm.ecommerce.exceptions.ValidationException;
 import ru.sfera.pm.ecommerce.model.dto.CategoryDto;
+import ru.sfera.pm.ecommerce.model.dto.CategoryDtoExtended;
 import ru.sfera.pm.ecommerce.model.entity.Category;
 import ru.sfera.pm.ecommerce.repository.CategoryRepository;
 import ru.sfera.pm.ecommerce.service.CategoryService;
@@ -32,15 +33,6 @@ public class CategoryServiceImpl implements CategoryService {
     public Page<CategoryDto> getAll(Pageable pageable) {
         return categoryRepository.findAll(pageable)
                 .map(category -> conversionService.convert(category, CategoryDto.class));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public CategoryDto getCategory(Long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND, id));
-
-        return conversionService.convert(category, CategoryDto.class);
     }
 
     @Override
@@ -71,5 +63,13 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.delete(category);
         log.info("Удалена категория (а также все товары, относящиеся к ней) с id: {}", category.getId());
 
+    }
+
+    @Override
+    public CategoryDtoExtended getCategoryWithProducts(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND, id));
+
+        return conversionService.convert(category, CategoryDtoExtended.class);
     }
 }
